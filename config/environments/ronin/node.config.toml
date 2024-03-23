@@ -8,7 +8,7 @@ Outputs = ["stderr"]
 	User = "state_user"
 	Password = "state_password"
 	Name = "state_db"
-	Host = "0.0.0.0"
+	Host = "zkevm-state-db"
 	Port = "5432"
 	EnableLog = false	
 	MaxConns = 200
@@ -25,7 +25,7 @@ GlobalQueue = 1024
 	User = "pool_user"
 	Password = "pool_password"
 	Name = "pool_db"
-	Host = "0.0.0.0"
+	Host = "zkevm-pool-db"
 	Port = "5433"
 	EnableLog = false
 	MaxConns = 200
@@ -52,14 +52,14 @@ EnableL2SuggestedGasPricePolling = false
 [Synchronizer]
 SyncInterval = "2s"
 SyncChunkSize = 100
-TrustedSequencerURL = "http://0.0.0.0:8545" # If it is empty or not specified, then the value is read from the smc
+TrustedSequencerURL = "http://zkevm-rpc:8545" # If it is empty or not specified, then the value is read from the smc
 L1SynchronizationMode = "sequential"
 
 [MTClient]
-URI = "0.0.0.0:50061"
+URI = "zkevm-prover:50061"
 
 [Executor]
-URI = "0.0.0.0:50071"
+URI = "zkevm-prover:50071"
 MaxResourceExhaustedAttempts = 3
 WaitOnResourceExhaustion = "1s"
 MaxGRPCMessageSize = 100000000
@@ -76,7 +76,7 @@ ProfilingEnabled = false
 User = "prover_user"
 Password = "prover_pass"
 Name = "prover_db"
-Host = "0.0.0.0"
+Host = "zkevm-state-db"
 Port = "5432"
 EnableLog = false
 MaxConns = 200
