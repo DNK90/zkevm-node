@@ -7,13 +7,13 @@ services:
     container_name: zkevm-rpc
     restart: unless-stopped
     depends_on:
-      zkevm-pool-db:
-        condition: service_healthy
-      zkevm-state-db:
-        condition: service_healthy
-      zkevm-sync:
-        condition: service_started
-    image: zkevm-node
+      - zkevm-pool-db
+#        condition: service_healthy
+      - zkevm-state-db
+#        condition: service_healthy
+      - zkevm-sync
+#        condition: service_started
+    image: kiendn60302/zkevm-node:v0.0.1
     deploy:
       resources:
         limits:
@@ -26,19 +26,19 @@ services:
     environment:
       - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/node.config.toml:/app/config.toml
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config.toml --components rpc"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components rpc --custom-network-file /app/config/node.genesis.json"
 
   zkevm-sync:
     container_name: zkevm-sync
     restart: unless-stopped
     depends_on:
-      zkevm-state-db:
-        condition: service_healthy
-    image: zkevm-node
+      - zkevm-state-db
+#        condition: service_healthy
+    image: kiendn60302/zkevm-node:v0.0.1
     ports:
       - 9092:9091 # needed if metrics enabled
     deploy:
@@ -50,11 +50,11 @@ services:
     environment:
       - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/node.config.toml:/app/config.toml
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config.toml --components synchronizer"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components synchronizer --custom-network-file /app/config/node.genesis.json"
 
   zkevm-state-db:
     container_name: zkevm-state-db
@@ -68,9 +68,9 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./db/scripts/init_prover_db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}/db/scripts/init_prover_db.sql:/docker-entrypoint-initdb.d/init.sql
       - ${ZKEVM_NODE_STATEDB_DATA_DIR}:/var/lib/postgresql/data
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/postgresql.conf:/etc/postgresql.conf
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}/postgresql.conf:/etc/postgresql.conf
     environment:
       - POSTGRES_USER=state_user
       - POSTGRES_PASSWORD=state_password
@@ -107,14 +107,14 @@ services:
   zkevm-prover:
     container_name: zkevm-prover
     restart: unless-stopped
-    image: hermeznetwork/zkevm-prover:v5.0.0-RC8
+    image: hermeznetwork/zkevm-prover:v5.0.4
     depends_on:
-      zkevm-state-db:
-        condition: service_healthy
+      - zkevm-state-db
+#        condition: service_healthy
     ports:
       - 50061:50061 # MT
       - 50071:50071 # Executor
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/prover.config.json:/usr/src/app/config.json
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/usr/src/app/config
     command: >
-      zkProver -c /usr/src/app/config.json
+      zkProver -c /usr/src/app/config/prover.config.json

@@ -350,21 +350,24 @@ func (etherMan *Client) VerifyGenBlockNumber(ctx context.Context, genBlockNumber
 // GetL1BlockUpgradeLxLy It returns the block genesis for LxLy before genesisBlock or error
 // TODO: Check if all RPC providers support this range of blocks
 func (etherMan *Client) GetL1BlockUpgradeLxLy(ctx context.Context, genesisBlock uint64) (uint64, error) {
-	it, err := etherMan.RollupManager.FilterInitialized(&bind.FilterOpts{
-		Start:   1,
-		End:     &genesisBlock,
-		Context: ctx,
-	})
-	if err != nil {
-		return uint64(0), err
-	}
-	for it.Next() {
-		log.Debugf("BlockNumber: %d Topics:Initialized(%d)", it.Event.Raw.BlockNumber, it.Event.Version)
-		if it.Event.Version == ETrogUpgradeVersion { // 2 is ETROG (LxLy upgrade)
-			log.Infof("LxLy upgrade found at blockNumber: %d", it.Event.Raw.BlockNumber)
-			return it.Event.Raw.BlockNumber, nil
-		}
-	}
+	// this code is only applied for ethereum where previous version exists before LxLy, we don't need this.
+	// Therefore, comment these codes and return Not found error
+
+	//it, err := etherMan.RollupManager.FilterInitialized(&bind.FilterOpts{
+	//	Start:   genesisBlock - 10,
+	//	End:     &genesisBlock,
+	//	Context: ctx,
+	//})
+	//if err != nil {
+	//	return uint64(0), err
+	//}
+	//for it.Next() {
+	//	log.Debugf("BlockNumber: %d Topics:Initialized(%d)", it.Event.Raw.BlockNumber, it.Event.Version)
+	//	if it.Event.Version == ETrogUpgradeVersion { // 2 is ETROG (LxLy upgrade)
+	//		log.Infof("LxLy upgrade found at blockNumber: %d", it.Event.Raw.BlockNumber)
+	//		return it.Event.Raw.BlockNumber, nil
+	//	}
+	//}
 	return uint64(0), ErrNotFound
 }
 
