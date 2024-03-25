@@ -32,12 +32,12 @@ services:
       - "-c"
       - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components rpc --custom-network-file /app/config/node.genesis.json"
 
-  zkevm-sync:
-    container_name: zkevm-sync
+  zkevm-eth-tx-manager:
+    container_name: zkevm-eth-tx-manager
     restart: unless-stopped
     depends_on:
       - zkevm-state-db
-#        condition: service_healthy
+    #        condition: service_healthy
     image: zkevm-node
     ports:
       - 9092:9091 # needed if metrics enabled
@@ -54,7 +54,129 @@ services:
     command:
       - "/bin/sh"
       - "-c"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components eth-tx-manager --custom-network-file /app/config/node.genesis.json"
+
+  zkevm-l2-gaspricer:
+    container_name: zkevm-l2-gaspricer
+    restart: unless-stopped
+    depends_on:
+      - zkevm-pool-db
+    #        condition: service_healthy
+    image: zkevm-node
+    ports:
+      - 9093:9091 # needed if metrics enabled
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+    volumes:
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components l2gaspricer --custom-network-file /app/config/node.genesis.json"
+
+  zkevm-sequencer:
+    container_name: zkevm-sequencer
+    restart: unless-stopped
+    depends_on:
+      - zkevm-state-db
+      - zkevm-pool-db
+    #        condition: service_healthy
+    image: zkevm-node
+    ports:
+      - 9094:9091 # needed if metrics enabled
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+    volumes:
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components eth-tx-manager --custom-network-file /app/config/node.genesis.json"
+
+  zkevm-sequencer-sender:
+    container_name: zkevm-sequencer-sender
+    restart: unless-stopped
+    depends_on:
+      - zkevm-state-db
+      - zkevm-pool-db
+    #        condition: service_healthy
+    image: zkevm-node
+    ports:
+      - 9095:9091 # needed if metrics enabled
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+    volumes:
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components sequence-sender --custom-network-file /app/config/node.genesis.json"
+
+  zkevm-sync:
+    container_name: zkevm-sync
+    restart: unless-stopped
+    depends_on:
+      - zkevm-state-db
+#        condition: service_healthy
+    image: zkevm-node
+    ports:
+      - 9096:9091 # needed if metrics enabled
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+    volumes:
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
+    command:
+      - "/bin/sh"
+      - "-c"
       - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components synchronizer --custom-network-file /app/config/node.genesis.json"
+
+  zkevm-aggregator:
+    container_name: zkevm-aggregator
+    restart: unless-stopped
+    depends_on:
+      - zkevm-state-db
+    #        condition: service_healthy
+    image: zkevm-node
+    ports:
+      - 9097:9091 # needed if metrics enabled
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+    volumes:
+      - ${ZKEVM_ADVANCED_CONFIG_DIR}:/app/config
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config/node.config.toml --components aggregator --custom-network-file /app/config/node.genesis.json"
 
   zkevm-state-db:
     container_name: zkevm-state-db

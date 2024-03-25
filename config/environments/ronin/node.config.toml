@@ -10,7 +10,7 @@ Outputs = ["stderr"]
 	Name = "state_db"
 	Host = "zkevm-state-db"
 	Port = "5432"
-	EnableLog = false	
+	EnableLog = false
 	MaxConns = 200
 
 [Pool]
@@ -26,7 +26,7 @@ GlobalQueue = 1024
 	Password = "pool_password"
 	Name = "pool_db"
 	Host = "zkevm-pool-db"
-	Port = "5433"
+	Port = "5432"
 	EnableLog = false
 	MaxConns = 200
 
@@ -80,3 +80,64 @@ Host = "zkevm-state-db"
 Port = "5432"
 EnableLog = false
 MaxConns = 200
+
+[Sequencer]
+DeletePoolTxsL1BlockConfirmations = 100
+DeletePoolTxsCheckInterval = "12h"
+TxLifetimeCheckInterval = "10m"
+TxLifetimeMax = "3h"
+LoadPoolTxsCheckInterval = "500ms"
+StateConsistencyCheckInterval = "5s"
+[Sequencer.Finalizer]
+NewTxsWaitInterval = "100ms"
+ForcedBatchesTimeout = "60s"
+ForcedBatchesCheckInterval = "10s"
+ForcedBatchesL1BlockConfirmations = 64
+L1InfoTreeL1BlockConfirmations = 64
+L1InfoTreeCheckInterval = "10s"
+BatchMaxDeltaTimestamp = "120s"
+L2BlockMaxDeltaTimestamp = "3s"
+ResourceExhaustedMarginPct = 10
+HaltOnBatchNumber = 0
+SequentialBatchSanityCheck = false
+SequentialProcessL2Block = true
+    [Sequencer.Finalizer.Metrics]
+        Interval = "60m"
+        EnableLog = true
+    [Sequencer.StreamServer]
+        Port = 0
+        Filename = ""
+        Enabled = false
+
+[SequenceSender]
+WaitPeriodSendSequence = "5s"
+LastBatchVirtualizationTimeMaxWaitPeriod = "5s"
+L1BlockTimestampMargin = "30s"
+MaxTxSizeForL1 = 131072
+L2Coinbase = "0x853e5f8bf7fd420b2f970da9bd88173b08b46131"
+PrivateKey = {Path = "/app/config/keystore/UTC--2024-03-25T07-03-40.376238000Z--853e5f8bf7fd420b2f970da9bd88173b08b46131", Password = "123456"}
+
+[Aggregator]
+Host = "0.0.0.0"
+Port = 50081
+RetryTime = "5s"
+VerifyProofInterval = "30s"
+TxProfitabilityCheckerType = "acceptall"
+TxProfitabilityMinReward = "1.1"
+ProofStatePollingInterval = "5s"
+SenderAddress = "0x853e5f8bf7fd420b2f970da9bd88173b08b46131"
+CleanupLockedProofsInterval = "2m"
+GeneratingProofCleanupThreshold = "10m"
+UpgradeEtrogBatchNumber = 0
+BatchProofL1BlockConfirmations = 2
+
+[EthTxManager]
+ForcedGas = 0
+PrivateKeys = [
+    {Path = "/app/config/keystore/UTC--2024-03-25T07-03-40.376238000Z--853e5f8bf7fd420b2f970da9bd88173b08b46131", Password = "123456"},
+]
+
+[L2GasPriceSuggester]
+Type = "default"
+DefaultGasPriceWei = 1000000000
+MaxGasPriceWei = 0
